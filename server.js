@@ -1,6 +1,5 @@
 const express = require('express');
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
 const axios = require('axios');
 const CryptoJS = require('crypto-js');
 require('dotenv').config();
@@ -27,10 +26,8 @@ const client = new Client({
 });
 
 client.on('qr', (qr) => {
-    console.log('--- 🚨 NEW QR CODE GENERATED 🚨 ---');
-    qrcode.generate(qr, { small: true });
-    console.log('--- SCAN THE QR CODE ABOVE TO CONNECT ---');
-    console.log(`Connection Link Timestamp: ${Date.now()}`);
+    console.log('--- SCAN THIS LINK FOR QR CODE ---');
+    console.log('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qr));
 });
 
 client.on('ready', () => {
@@ -40,7 +37,7 @@ client.on('ready', () => {
 // Keep-Alive Function to prevent Render from sleeping
 setInterval(() => {
     console.log("Keep-Alive: Bot is active...");
-}, 300000); // Pings every 5 minutes
+}, 300000);
 
 function signRequest(params, secret) {
     return CryptoJS.HmacSHA256(params, secret).toString(CryptoJS.enc.Hex);
