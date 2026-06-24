@@ -17,8 +17,9 @@ const baseUrl = 'https://contract.mexc.com';
 
 let latestSignal = null;
 
+// Bot Configuration
 const client = new Client({
-    authStrategy: new LocalAuth(),
+    authStrategy: new LocalAuth({ clientId: "prince-bot-session" }),
     puppeteer: {
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -26,13 +27,20 @@ const client = new Client({
 });
 
 client.on('qr', (qr) => {
-    console.log('SCAN THIS QR CODE TO CONNECT WHATSAPP:');
+    console.log('--- 🚨 NEW QR CODE GENERATED 🚨 ---');
     qrcode.generate(qr, { small: true });
+    console.log('--- SCAN THE QR CODE ABOVE TO CONNECT ---');
+    console.log(`Connection Link Timestamp: ${Date.now()}`);
 });
 
 client.on('ready', () => {
     console.log('WhatsApp Bot is successfully activated!');
 });
+
+// Keep-Alive Function to prevent Render from sleeping
+setInterval(() => {
+    console.log("Keep-Alive: Bot is active...");
+}, 300000); // Pings every 5 minutes
 
 function signRequest(params, secret) {
     return CryptoJS.HmacSHA256(params, secret).toString(CryptoJS.enc.Hex);
@@ -43,9 +51,9 @@ async function executeMexcOrder(symbol, side, openType) {
         const timestamp = Date.now();
         const mexcSymbol = "USOIL_USDT";
         let contractPath = '/api/v1/contract/order/submit';
-       
+      
         let type = openType === 1 ? (side === 'BUY' ? 1 : 2) : (side === 'BUY' ? 3 : 4);
-       
+      
         let bodyParams = {
             symbol: mexcSymbol,
             price: 0,
@@ -90,7 +98,7 @@ app.post('/webhook', async (req, res) => {
     };
 
     const targetNumber = process.env.WHATSAPP_NUMBER + "@c.us";
-   
+  
     const messageText = `*🚨 OIL TRADING ALERT (USOIL) 🚨*\n\n` +
                         `🛢️ *Symbol:* ${latestSignal.symbol}\n` +
                         `⚡ *Action:* ${latestSignal.action}\n` +
